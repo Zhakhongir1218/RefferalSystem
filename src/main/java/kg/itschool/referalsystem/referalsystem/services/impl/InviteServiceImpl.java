@@ -10,6 +10,7 @@ import kg.itschool.referalsystem.referalsystem.services.InviteService;
 import kg.itschool.referalsystem.referalsystem.services.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -43,7 +44,7 @@ public class InviteServiceImpl implements InviteService {
 
         // Ниже считаем количество отправленных инвайтов у отправителя
         Integer tmp = inviteRepo.countInviteBySender(invite.getSender().getSubscriber_id(), invite);
-        if(tmp >= 5){
+        if (tmp >= 5) {
             invite.setInviteStatus(InviteStatus.CANCELLED);
         }
 
@@ -54,12 +55,12 @@ public class InviteServiceImpl implements InviteService {
 
 
     public Boolean sendedBeforeOrNot(Invite invite) throws SubscriberExeptions {
-        Integer counting = inviteRepo.countSameSendersAndReceivers(invite.getSender().getSubscriber_id(),invite.getReceiver().getSubscriber_id(),invite);
+        Integer counting = inviteRepo.countSameSendersAndReceivers(invite.getSender().getSubscriber_id(), invite.getReceiver().getSubscriber_id(), invite);
         boolean checker;
-        if(counting<1){
+        if (counting < 1) {
             checker = true;
             return checker;
-        }else {
+        } else {
             throw new SubscriberExeptions("You have send an invite to this user today!");
         }
     }
