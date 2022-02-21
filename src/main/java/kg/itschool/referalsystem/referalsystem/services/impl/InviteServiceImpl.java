@@ -2,6 +2,7 @@ package kg.itschool.referalsystem.referalsystem.services.impl;
 
 import kg.itschool.referalsystem.referalsystem.exceptions.SubscriberExeptions;
 import kg.itschool.referalsystem.referalsystem.models.dtos.InviteDTO;
+import kg.itschool.referalsystem.referalsystem.models.dtos.SubsPhoneDTO;
 import kg.itschool.referalsystem.referalsystem.models.entities.Invite;
 import kg.itschool.referalsystem.referalsystem.models.entities.Subscriber;
 import kg.itschool.referalsystem.referalsystem.models.enums.InviteStatus;
@@ -49,6 +50,16 @@ public class InviteServiceImpl implements InviteService {
         }
 
 
+        inviteRepo.save(invite);
+        return invite;
+    }
+
+    @Override
+    public Invite receiveInvite(String phone) {
+        Invite invite = inviteRepo.findDistinctFirstByReceiverPhone(phone);
+        invite.getReceiver().setEdit_date(LocalDate.now());
+        invite.getReceiver().setActive(true);
+        invite.setInviteStatus(InviteStatus.ACCEPTED);
         inviteRepo.save(invite);
         return invite;
     }
