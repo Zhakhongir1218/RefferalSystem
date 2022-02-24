@@ -38,17 +38,21 @@ public class InviteServiceImpl implements InviteService {
         invite.setSender(sender);
         invite.setReceiver(receiver);
         invite.setInviteStatus(InviteStatus.NEW);
-        invite.setStart_date(inviteRepo.findLastDate(sender.getSubscriber_id(),receiver.getSubscriber_id()));
-        LocalDate checkingForFiveDay = inviteRepo.findLastForFiveDaysMethod(sender.getSubscriber_id());
+        invite.setStart_date(inviteRepo.findLastDate(sender.getSubscriber_id(), receiver.getSubscriber_id()));
+        LocalDate MethodCountingForFiveDays = inviteRepo.findLastDate(sender.getSubscriber_id(), receiver.getSubscriber_id());
+        if (invite.getStart_date() == null) {
+            invite.setStart_date(LocalDate.now());
+        }
+
         //Одному подписчику один инвайт от другого подписчика
         sendedBeforeOrNot(invite);
 
         // Ниже считаем количество отправленных инвайтов у отправителя
         Integer tmp = inviteRepo.countInviteBySender(invite.getSender().getSubscriber_id(), invite);
-        if(invite.getStart_date().isBefore(LocalDate.now())){
-            tmp = 0;
+        if (MethodCountingForFiveDays.isBefore(LocalDate.now())) {
+            tmp = tmp - 1;
         }
-        if (tmp > 5) {
+        if (tmp >= 5) {
             throw new SubscriberExeptions("Your day limit is over!");
         }
 
@@ -69,9 +73,9 @@ public class InviteServiceImpl implements InviteService {
 
 
     public Boolean sendedBeforeOrNot(Invite invite) throws SubscriberExeptions {
-        Integer counting = inviteRepo.countSameSendersAndReceivers(invite.getSender().getSubscriber_id(), invite.getReceiver().getSubscriber_id(), invite);
+        Integer counting = inviteRepo.countSameSendersAndReceivers(invite.getSender().getSubscriber_id(), invite.getReceiver().getSubscriber_id());
         boolean checker;
-        if(invite.getStart_date().isBefore(LocalDate.now())){
+        if (invite.getStart_date().isBefore(LocalDate.now())) {
             checker = true;
             invite.setStart_date(LocalDate.now());
             return checker;
