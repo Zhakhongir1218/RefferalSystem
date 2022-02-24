@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Objects;
 
 @Service
@@ -33,20 +34,22 @@ public class InviteServiceImpl implements InviteService {
             throw new SubscriberExeptions("Subscriber not found");
         }
 
-
         Invite invite = new Invite();
         invite.setSender(sender);
         invite.setReceiver(receiver);
         invite.setInviteStatus(InviteStatus.NEW);
-        invite.setStart_date(LocalDate.now());
-        invite.setEnd_date(LocalDate.now().plusDays(30));
+        invite.setStart_date(inviteRepo.findLastDate(sender.getSubscriber_id(),receiver.getSubscriber_id()));
+        LocalDate checkingForFiveDay = inviteRepo.findLastForFiveDaysMethod(sender.getSubscriber_id());
         //Одному подписчику один инвайт от другого подписчика
         sendedBeforeOrNot(invite);
 
         // Ниже считаем количество отправленных инвайтов у отправителя
         Integer tmp = inviteRepo.countInviteBySender(invite.getSender().getSubscriber_id(), invite);
-        if (tmp >= 5) {
-            invite.setInviteStatus(InviteStatus.CANCELLED);
+        if(invite.getStart_date().isBefore(LocalDate.now())){
+            tmp = 0;
+        }
+        if (tmp > 5) {
+            throw new SubscriberExeptions("Your day limit is over!");
         }
 
 
@@ -68,8 +71,14 @@ public class InviteServiceImpl implements InviteService {
     public Boolean sendedBeforeOrNot(Invite invite) throws SubscriberExeptions {
         Integer counting = inviteRepo.countSameSendersAndReceivers(invite.getSender().getSubscriber_id(), invite.getReceiver().getSubscriber_id(), invite);
         boolean checker;
+        if(invite.getStart_date().isBefore(LocalDate.now())){
+            checker = true;
+            invite.setStart_date(LocalDate.now());
+            return checker;
+        }
         if (counting < 1) {
             checker = true;
+            invite.setStart_date(LocalDate.now());
             return checker;
         } else {
             throw new SubscriberExeptions("You have send an invite to this user today!");
