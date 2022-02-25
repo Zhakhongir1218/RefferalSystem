@@ -2,7 +2,6 @@ package kg.itschool.referalsystem.referalsystem.services.impl;
 
 import kg.itschool.referalsystem.referalsystem.exceptions.SubscriberExeptions;
 import kg.itschool.referalsystem.referalsystem.models.dtos.InviteDTO;
-import kg.itschool.referalsystem.referalsystem.models.dtos.SubsPhoneDTO;
 import kg.itschool.referalsystem.referalsystem.models.entities.Invite;
 import kg.itschool.referalsystem.referalsystem.models.entities.Subscriber;
 import kg.itschool.referalsystem.referalsystem.models.enums.InviteStatus;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.Objects;
 
 @Service
@@ -32,6 +30,10 @@ public class InviteServiceImpl implements InviteService {
         Subscriber receiver = subscriberService.findByPhone(inviteDTO.getReceiver());
         if (Objects.isNull(sender) & Objects.isNull(receiver)) {
             throw new SubscriberExeptions("Subscriber not found");
+        }
+        Integer countSenderPerMonth = inviteRepo.countAllInvitesPerMonth(sender.getSubscriber_id());
+        if(countSenderPerMonth>30){
+            throw new SubscriberExeptions("You have spent your month limit!");
         }
 
         Invite invite = new Invite();
@@ -63,6 +65,7 @@ public class InviteServiceImpl implements InviteService {
         Invite invite = inviteRepo.findDistinctFirstByReceiverPhone(phone);
         invite.getReceiver().setEdit_date(LocalDate.now());
         invite.getReceiver().setActive(true);
+        invite.setEnd_date(LocalDate.now());
         invite.setInviteStatus(InviteStatus.ACCEPTED);
         inviteRepo.save(invite);
         return invite;

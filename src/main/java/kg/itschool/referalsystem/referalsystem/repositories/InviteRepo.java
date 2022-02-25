@@ -32,4 +32,8 @@ public interface InviteRepo extends JpaRepository<Invite,Long> {
 
     @Query(value = "select start_date FROM invites where sender_id=?1",nativeQuery = true)
     LocalDate findLastForFiveDaysMethod(Long subscriber_id);
+
+
+    @Query(value = "Select Count(sender_id) FROM invites where sender_id = ?1 and start_date >= (select date_trunc ( 'month', current_date));",nativeQuery = true)
+    Integer countAllInvitesPerMonth(Long sender_id);
 }
