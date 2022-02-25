@@ -39,7 +39,6 @@ public class InviteServiceImpl implements InviteService {
         invite.setReceiver(receiver);
         invite.setInviteStatus(InviteStatus.NEW);
         invite.setStart_date(inviteRepo.findLastDate(sender.getSubscriber_id(), receiver.getSubscriber_id()));
-        LocalDate MethodCountingForFiveDays = inviteRepo.findLastDate(sender.getSubscriber_id(), receiver.getSubscriber_id());
         if (invite.getStart_date() == null) {
             invite.setStart_date(LocalDate.now());
         }
@@ -49,9 +48,7 @@ public class InviteServiceImpl implements InviteService {
 
         // Ниже считаем количество отправленных инвайтов у отправителя
         Integer tmp = inviteRepo.countInviteBySender(invite.getSender().getSubscriber_id(), invite);
-        if (MethodCountingForFiveDays.isBefore(LocalDate.now())) {
-            tmp = tmp - 1;
-        }
+
         if (tmp >= 5) {
             throw new SubscriberExeptions("Your day limit is over!");
         }

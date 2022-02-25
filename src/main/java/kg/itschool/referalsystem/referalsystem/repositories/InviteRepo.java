@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface InviteRepo extends JpaRepository<Invite,Long> {
 
-    @Query(value = "Select Count(sender_id) FROM invites where sender_id = ?1",nativeQuery = true)
+    @Query(value = "Select Count(sender_id) FROM invites where sender_id = ?1 and start_date = current_date ",nativeQuery = true)
     Integer countInviteBySender(Long id, Invite invite);
 
     @Query(value = "SELECT COUNT(sender_id) FROM invites where sender_id=?1 And receiver_id = ?2", nativeQuery = true)
